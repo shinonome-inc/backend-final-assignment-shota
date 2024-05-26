@@ -10,11 +10,16 @@
   <!-- header  -->
   <header class="mb-3">
     <nav>
+
       <ul><!--urlの逆引き-->
+        {% if user.is_authenticated %}
         <li><a href="{% url 'welcome:welcome' %}">Twitter Clone</a></li>
+        <li><a href="{% url 'accounts:logout' %}">logout</a></li>
+        {% else %}
         <li><a href="{% url 'accounts:signup' %}">Sign up</a></li>
         <li><a href="{% url 'accounts:login' %}">login</a></li>
-        <li><a href="{% url 'accounts:logout' %}">logout</a></li>
+        {% endif %}
+        <!--ifとendifで必ず挟む-->
       </ul>
     </nav>
   </header>

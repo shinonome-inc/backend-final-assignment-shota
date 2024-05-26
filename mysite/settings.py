@@ -55,7 +55,7 @@ ROOT_URLCONF = "mysite.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / "templates"],
+        "DIRS": [BASE_DIR / "templates"],  # templatesフォルダの下に今からhtmlを入れていくという宣言
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -128,7 +128,10 @@ AUTH_USER_MODEL = "accounts.User"
 
 # 最終課題ではならないが、usersというフォルダの中にUserというモデルを作成した場合は
 # AUTH_USER_MODEL = "users.User" となる
-
+# login,logoutした時のURLを記述
+LOGIN_URL = "accounts:login"
+LOGIN_REDIRECT_URL = "tweets:home"
+LOGOUT_REDIRECT_URL = "accounts:login"
 SQL_DEBUG = True
 if SQL_DEBUG:
 

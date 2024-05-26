@@ -13,8 +13,10 @@
 
       <ul><!--urlの逆引き-->
         {% if user.is_authenticated %}
+        <!--<li></li>で挟むと箇条書き表示になる-->
         <li><a href="{% url 'welcome:welcome' %}">Twitter Clone</a></li>
         <li><a href="{% url 'accounts:logout' %}">logout</a></li>
+        <li><a href="{% url 'tweets:home' %}">home</a></li>
         {% else %}
         <li><a href="{% url 'accounts:signup' %}">Sign up</a></li>
         <li><a href="{% url 'accounts:login' %}">login</a></li>

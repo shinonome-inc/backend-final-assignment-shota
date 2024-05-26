@@ -247,6 +247,7 @@ class TestLoginView(TestCase):
             "正しいユーザー名とパスワードを入力してください。どちらのフィールドも大文字と小文字は区別されます。",
             form.errors["__all__"],
         )
+        self.assertNotIn(SESSION_KEY, self.client.session)
 
     def test_failure_post_with_empty_password(self):
         invalid_data = {"username": "testuser", "password": ""}
@@ -254,6 +255,7 @@ class TestLoginView(TestCase):
         form = response.context["form"]
         self.assertFalse(form.is_valid())
         self.assertIn("このフィールドは必須です。", form.errors["password"])
+        self.assertNotIn(SESSION_KEY, self.client.session)
 
 
 class TestLogoutView(TestCase):

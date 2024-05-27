@@ -132,11 +132,11 @@ AUTH_USER_MODEL = "accounts.User"
 LOGIN_URL = "accounts:login"
 LOGIN_REDIRECT_URL = "tweets:home"
 LOGOUT_REDIRECT_URL = "accounts:login"
-SQL_DEBUG = True
+SQL_DEBUG = False
 if SQL_DEBUG:
 
     def show_toolbar(request):
-        return False
+        return True
 
     INSTALLED_APPS += ("debug_toolbar",)
     MIDDLEWARE += ("debug_toolbar.middleware.DebugToolbarMiddleware",)

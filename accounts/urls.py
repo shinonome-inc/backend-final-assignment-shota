@@ -13,7 +13,8 @@ urlpatterns = [
     path("login/", auth_views.LoginView.as_view(template_name="accounts/login.html"), name="login"),
     # auth_views.UserLoginViewでviews.pyの UserLoginView を呼び出している
     path("logout/", auth_views.LogoutView.as_view(), name="logout"),
-    path("user_profile/", views.UserProfileView.as_view(), name="user_profile"),
+    path("<str:username>/", views.UserProfileView.as_view(), name="user_profile"),
+    # path(“アドレス/<値の種類: 値の引数>/”, view関数);
     # path('<str:username>/follow/', views.FollowView.as_view(), name='follow'),
     # path('<str:username>/unfollow/', views.UnFollowView, name='unfollow'),
     # path('<str:username>/following_list/', views.FollowingListView.as_view(), name='following_list'),

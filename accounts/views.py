@@ -3,7 +3,7 @@ from django.conf import settings
 from django.contrib.auth import authenticate, get_user_model, login
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
-from django.views.generic import CreateView
+from django.views.generic import CreateView, TemplateView
 
 from .forms import SignupForm
 
@@ -24,14 +24,19 @@ class SignupView(CreateView):
         return response
 
 
-class UserProfileView(LoginRequiredMixin, CreateView):
+class UserProfileView(LoginRequiredMixin, TemplateView):
     # LoginRequiredMixinを継承するとログインしていないユーザーがprofile画面へ飛ぼうとするとログインページに遷移するようになる
     template_name = "accounts/user_profile.html"
 
     #  遷移先のテンプレートを指定するための変数。全てのTemplateViewクラスで設定可能
-    fields = ["username"]
+    # fields = ["username"]
     # フォームに表示するフィールドを指定する
-
+    def get_context_data(self, **kwargs):
+        # super().get_context_data(**kwargs)で親クラスの.get_context_dataを呼び出し、contextに格納
+        context = super().get_context_data(**kwargs)
+        # 親クラスの**kwargsで得られた辞書型のデータを一部書き換える
+        context["username"] = self.kwargs["username"]
+        return context
     model = User
     # レコード更新をかけるモデルを指定するための変数。
     #  ここで指定したモデルに関しては、モデル名をスネークケースに変換したものが自動的にcontextに追加される(例：Bookモデルであればcontext["book"]に格納される)。

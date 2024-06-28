@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}login{% endblock %}
+{% block content %}
+
+<form method="post">
+    {{ form.as_p }} <!--formにはloginFormのインスタンスが入っている。as_pとすることで、各input要素(クラス内に定義した要素)がpタグで囲まれた状態で表示される。-->
+    {% csrf_token %}
+    <button type="submit">ログイン</button>
+</form>
+{% endblock %}

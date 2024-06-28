@@ -37,6 +37,7 @@ class UserProfileView(LoginRequiredMixin, TemplateView):
         # 親クラスの**kwargsで得られた辞書型のデータを一部書き換える
         context["username"] = self.kwargs["username"]
         return context
+
     model = User
     # レコード更新をかけるモデルを指定するための変数。
     #  ここで指定したモデルに関しては、モデル名をスネークケースに変換したものが自動的にcontextに追加される(例：Bookモデルであればcontext["book"]に格納される)。

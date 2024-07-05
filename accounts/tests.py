@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth import SESSION_KEY, get_user_model
 from django.test import TestCase
 from django.urls import reverse
@@ -27,6 +28,7 @@ class TestSignupView(TestCase):
         }
 
         response = self.client.post(self.url, valid_data)
+        # self.client.post(ページのURL, 保存したいデータ)
         # ユーザーがフォームにデータを打ち込んでユーザー登録ボタンを押した操作を表している
         # self.client.postのメソッドは、第１引数にurlを、第２引数にdict型でデータを入れることでpostができる。
         # 1の確認 = tweets/homeにリダイレクトすること
@@ -34,7 +36,7 @@ class TestSignupView(TestCase):
             response,
             reverse("tweets:home"),
             status_code=302,  # リクエストされたリソースの URI が 一時的に 変更されたことを示す
-            target_status_code=200,
+            target_status_code=200,  # target_codeはリダイレクト先の画面がきちんと表示されているかどうかを見るものとなる
         )
         # 引数	    意味
         # response	GET/POSTしたレスポンス
@@ -66,7 +68,6 @@ class TestSignupView(TestCase):
             form.is_valid()
         )  # .is_valid()が参照されるとフォームのfull_clean()メソッドが実行されフォームのバリデーションが行われる
         self.assertIn("このフィールドは必須です。", form.errors["username"])
-        print(response.context["form"])
 
     def test_failure_post_with_empty_email(self):
         invalid_data = {
@@ -96,7 +97,6 @@ class TestSignupView(TestCase):
         }
         response = self.client.post(self.url, invalid_data)
         form = response.context["form"]  # データの抽出
-        print(form.errors)
         # response.contextというのは、responseで表示されているhtml等の情報が全て入っている
         self.assertEqual(response.status_code, 200)
         self.assertFalse(User.objects.filter(email=invalid_data["email"]).exists())
@@ -116,7 +116,6 @@ class TestSignupView(TestCase):
         response = self.client.post(self.url, invalid_data)
         form = response.context["form"]  # データの抽出
         # response.contextというのは、responseで表示されているhtml等の情報が全て入っている
-        print(form.errors)
         self.assertEqual(response.status_code, 200)
         self.assertFalse(
             User.objects.filter(password=invalid_data["password1"]).exists()
@@ -149,7 +148,6 @@ class TestSignupView(TestCase):
         }
         response = self.client.post(self.url, invalid_data)
         form = response.context["form"]
-        print(form.errors)
         self.assertFalse(User.objects.filter(email=invalid_data["email"]).exists())
         self.assertEqual(response.status_code, 200)
         self.assertFalse(form.is_valid())
@@ -185,7 +183,6 @@ class TestSignupView(TestCase):
         #  print(form.errors)
         self.assertEqual(response.status_code, 200)
         self.assertFalse(form.is_valid())
-        print(form.errors)
         self.assertIn("このパスワードは ユーザー名 と似すぎています。", form.errors["password2"])
 
     def test_failure_post_with_only_numbers_password(self):
@@ -198,7 +195,6 @@ class TestSignupView(TestCase):
         response = self.client.post(self.url, invalid_data)
         form = response.context["form"]  # データの抽出
         # response.contextというのは、responseで表示されているhtml等の情報が全て入っている
-        print(form.errors)
         self.assertEqual(response.status_code, 200)
         self.assertFalse(User.objects.filter(password=invalid_data["password1"]).exists())
         self.assertFalse(form.is_valid())
@@ -215,25 +211,68 @@ class TestSignupView(TestCase):
         response = self.client.post(self.url, invalid_data)
         form = response.context["form"]  # データの抽出
         # response.contextというのは、responseで表示されているhtml等の情報が全て入っている
-        print(form.errors["password2"])
         self.assertEqual(response.status_code, 200)
         self.assertFalse(User.objects.filter(username=invalid_data["username"], email=invalid_data["email"]).exists())
         self.assertFalse(form.is_valid())
         self.assertIn("確認用パスワードが一致しません。", form.errors["password2"])
 
 
-#  class TestLoginView(TestCase):
-#     def test_success_get(self):
+class TestLoginView(TestCase):
+    def setUp(self):
+        self.url = reverse("accounts:login")
+        User.objects.create_user(username="testuser", password="password1")
 
-#     def test_success_post(self):
+    def test_success_get(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "accounts/login.html")
 
-#     def test_failure_post_with_not_exists_user(self):
+    def test_success_post(self):
+        valid_data = {"username": "testuser", "password": "password1"}
+        response = self.client.post(self.url, valid_data)
+        self.assertRedirects(
+            response,
+            reverse(settings.LOGIN_REDIRECT_URL),  # 変数で指定したほうが一貫性が保てる
+            status_code=302,  # リクエストされたリソースの URI が 一時的に 変更されたことを示す
+            target_status_code=200,
+        )
+        self.assertIn(SESSION_KEY, self.client.session)
 
-#     def test_failure_post_with_empty_password(self):
+    def test_failure_post_with_not_exists_user(self):
+        invalid_data = {"username": "testuserss", "password": "password1"}
+        response = self.client.post(self.url, invalid_data)
+        form = response.context["form"]
+        self.assertFalse(form.is_valid())
+        self.assertIn(
+            "正しいユーザー名とパスワードを入力してください。どちらのフィールドも大文字と小文字は区別されます。",
+            form.errors["__all__"],
+        )
+        self.assertNotIn(SESSION_KEY, self.client.session)
+
+    def test_failure_post_with_empty_password(self):
+        invalid_data = {"username": "testuser", "password": ""}
+        response = self.client.post(self.url, invalid_data)
+        form = response.context["form"]
+        self.assertFalse(form.is_valid())
+        self.assertIn("このフィールドは必須です。", form.errors["password"])
+        self.assertNotIn(SESSION_KEY, self.client.session)
 
 
-# class TestLogoutView(TestCase):
-#     def test_success_post(self):
+class TestLogoutView(TestCase):
+    def setUp(self):
+        self.url = reverse("accounts:logout")
+        User.objects.create_user(username="testuser", password="password1")
+        self.client.login(username="testuser", password="password1")
+
+    def test_success_post(self):
+        response = self.client.post(self.url)
+        self.assertRedirects(
+            response,
+            reverse(settings.LOGOUT_REDIRECT_URL),
+            status_code=302,  # リクエストされたリソースの URI が 一時的に 変更されたことを示す
+            target_status_code=200,
+        )
+        self.assertNotIn(SESSION_KEY, self.client.session)
 
 
 # class TestUserProfileView(TestCase):
